@@ -11,12 +11,13 @@ export default function AboutScreen() {
       />
       <Text style={styles.title}>About Qibla Compass</Text>
       <Text style={styles.description}>
-        This application uses your device's sensors and location to calculate the shortest path towards the Kaaba in Makkah, Saudi Arabia. 
+        This application uses your device's sensors and location to find out direction to the Kaaba in Makkah, Saudi Arabia. 
       </Text>
-      <Text style={styles.version}>Version 1.0.0 (Expo SDK 54)</Text>
-      <View style={styles.credits}>
-        <Text style={styles.creditsText}>Designed with elegance and care.</Text>
-      </View>
+      <Text style={styles.version}>Version 1.0.0</Text>
+      <Text></Text>
+      {/* <View style={styles.credits}> */}
+        <Text style={styles.creditsText}>Developed By Md. A. Barik (Software Engineer)</Text>
+      {/* </View> */}
     </View>
   );
 }

@@ -16,6 +16,11 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.barik.qiblacompass",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0A251C"
@@ -24,6 +29,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fc2dfc88-0011-4c4d-8b87-0242fb121028"
+      }
     }
   }
 }

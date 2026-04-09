@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, ActivityIndicator, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
-import { Magnetometer } from 'expo-sensors';
 import { calculateQiblaBearing } from '../utils/QiblaMath';
 
 const { width } = Dimensions.get('window');
@@ -13,6 +12,8 @@ export default function HomeScreen() {
   const [qiblaBearing, setQiblaBearing] = useState(0);
 
   useEffect(() => {
+    let headingSub;
+
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -20,31 +21,25 @@ export default function HomeScreen() {
         return;
       }
 
+      // Start watching compass heading
+      headingSub = await Location.watchHeadingAsync((data) => {
+        const newHeading = data.trueHeading >= 0 ? data.trueHeading : data.magHeading;
+        if (newHeading >= 0) {
+          setHeading(Math.round(newHeading));
+        }
+      });
+
+      // Also get current position to calculate Qibla
       let loc = await Location.getCurrentPositionAsync({});
       setLocation(loc);
       const bearing = calculateQiblaBearing(loc.coords.latitude, loc.coords.longitude);
       setQiblaBearing(bearing);
     })();
-  }, []);
-
-  useEffect(() => {
-    Magnetometer.setUpdateInterval(100);
-    const subscription = Magnetometer.addListener((data) => {
-      let { x, y } = data;
-      
-      let angle = Math.atan2(y, x);
-      let angleDegree = angle * (180 / Math.PI);
-      
-      // Calculate heading relative to North
-      let h = 90 - angleDegree;
-      if (h < 0) {
-        h += 360;
-      }
-      setHeading(Math.round(h));
-    });
 
     return () => {
-      subscription.remove();
+      if (headingSub) {
+        headingSub.remove();
+      }
     };
   }, []);
 
@@ -101,21 +96,37 @@ export default function HomeScreen() {
 
 const AnimatedKaaba = ({ rotation }) => {
   return (
-    <Image
-      source={require('../../assets/kaaba.png')}
+    <View
       style={[
-        styles.kaabaImage,
-        { transform: [{ rotate: `${rotation}deg` }] }
+        styles.pointerWrapper,
+        { transform: [{ rotate: `${rotation}deg` }] },
       ]}
-      resizeMode="contain"
-    />
+    >
+      {/* Arrow pointing up */}
+      <View style={styles.arrowContainer}>
+        {/* Triangle head */}
+        <View style={styles.arrowHead} />
+        {/* Arrow line/stick */}
+        <View style={styles.arrowLine} />
+      </View>
+
+      {/* Kaaba image */}
+      <Image
+        source={require('../../assets/kaaba.png')}
+        style={styles.kaabaImage}
+        resizeMode="contain"
+      />
+    </View>
   );
 };
+
+const COMPASS_SIZE = width * 0.85;
+const KAABA_SIZE = width * 0.35;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A251C', // Dark emerald tone suitable for premium Islamic app
+    backgroundColor: '#0A251C',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 40,
@@ -130,7 +141,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#FFD700',
     fontSize: 16,
-    fontFamily: 'System', // Standard iOS, or default android
+    fontFamily: 'System',
     fontWeight: '600',
   },
   errorText: {
@@ -156,23 +167,48 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   compassContainer: {
-    width: width * 0.85,
-    height: width * 0.85,
+    width: COMPASS_SIZE,
+    height: COMPASS_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
   staticRing: {
     position: 'absolute',
-    width: width * 0.85,
-    height: width * 0.85,
-    borderRadius: (width * 0.85) / 2,
+    width: COMPASS_SIZE,
+    height: COMPASS_SIZE,
+    borderRadius: COMPASS_SIZE / 2,
     borderWidth: 6,
-    borderColor: 'rgba(255, 215, 0, 0.2)', // translucent gold
+    borderColor: 'rgba(255, 215, 0, 0.2)',
+  },
+  pointerWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrowContainer: {
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  arrowHead: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 16,
+    borderRightWidth: 16,
+    borderBottomWidth: 28,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#FFD700',
+  },
+  arrowLine: {
+    width: 6,
+    height: 40,
+    backgroundColor: '#FFD700',
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
   },
   kaabaImage: {
-    width: width * 0.6,
-    height: width * 0.6,
+    width: KAABA_SIZE,
+    height: KAABA_SIZE,
   },
   footer: {
     marginBottom: 20,
