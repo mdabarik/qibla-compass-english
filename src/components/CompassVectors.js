@@ -3,17 +3,18 @@ import Svg, { Circle, Line, Text, G, Path, Rect, Polygon } from 'react-native-sv
 
 export const CompassDial = ({ size }) => {
   const center = size / 2;
-  const radius = center * 0.90;
+  // Shrunk slightly so the large text circles don't clip outside the SVG bounds!
+  const radius = center * 0.76; 
   const tickOuter = radius;
-  const tickMid = radius * 0.93;
-  const tickInner = radius * 0.88;
+  const tickMid = radius * 0.91;
+  const tickInner = radius * 0.86;
   
   // N, E, S, W configurations
   const letters = [
-    { label: 'N', angle: 0 },
-    { label: 'E', angle: 90 },
-    { label: 'S', angle: 180 },
-    { label: 'W', angle: 270 },
+    { label: 'North', angle: 0 },
+    { label: 'East', angle: 90 },
+    { label: 'South', angle: 180 },
+    { label: 'West', angle: 270 },
   ];
 
   const ticks = [];
@@ -49,16 +50,16 @@ export const CompassDial = ({ size }) => {
       {/* Letters with distinct circle background on edges */}
       {letters.map((item, index) => (
         <G key={index} rotation={item.angle} origin={`${center}, ${center}`}>
-          {/* Inner circle for letter */}
-          <Circle cx={center} cy={center - radius} r={center * 0.16} fill="#051811" stroke="#FFD700" strokeWidth="2" />
+          {/* Inner circle for letter - scaled perfectly to avoid clipping */}
+          <Circle cx={center} cy={center - radius} r={center * 0.18} fill="#051811" stroke="#FFD700" strokeWidth="2" />
           {/* Outer ring accent */}
-          <Circle cx={center} cy={center - radius} r={center * 0.19} fill="none" stroke="#A9DFBF" strokeWidth="0.5" opacity="0.5" />
+          <Circle cx={center} cy={center - radius} r={center * 0.21} fill="none" stroke="#A9DFBF" strokeWidth="1" opacity="0.5" />
           
           <Text 
             x={center} 
-            y={center - radius + (center * 0.05)} 
-            fill={item.label === 'N' ? '#FF6B6B' : '#FFD700'} 
-            fontSize={center * 0.14} 
+            y={center - radius + (center * 0.03)} 
+            fill={item.label === 'West' ? '#FF6B6B' : '#FFD700'} 
+            fontSize={center * 0.085} 
             fontWeight="bold" 
             textAnchor="middle"
           >
@@ -91,17 +92,14 @@ export const KaabaIndicator = ({ size }) => {
   return (
     <Svg width={size} height={size}>
       {/* Graceful Arrow pointing up to Qibla */}
-      {/* Outer glow ring around arrow */}
-      <Circle cx={center} cy={center * 0.35} r={32} fill="radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%)" />
-      
-      {/* Arrow Head */}
+      {/* Arrow Needle — tip at center of text circles, stops above Kaaba */}
       <Path 
-        d={`M ${center} ${center * 0.05} L ${center + 16} ${center * 0.3} L ${center + 5} ${center * 0.3} L ${center + 5} ${ky - 5} L ${center - 5} ${ky - 5} L ${center - 5} ${center * 0.3} L ${center - 16} ${center * 0.3} Z`}
+        d={`M ${center} ${center * 0.38} L ${center + 12} ${center * 0.52} L ${center + 3} ${center * 0.52} L ${center + 3} ${center * 0.97} L ${center - 3} ${center * 0.97} L ${center - 3} ${center * 0.52} L ${center - 12} ${center * 0.52} Z`}
         fill="#FFD700"
       />
       <Path 
-        d={`M ${center} ${center * 0.05} L ${center + 16} ${center * 0.3} L ${center + 5} ${center * 0.3} L ${center + 5} ${ky - 5} L ${center - 5} ${ky - 5} L ${center - 5} ${center * 0.3} L ${center - 16} ${center * 0.3} Z`}
-        fill="none" stroke="#FFF" strokeWidth="1" opacity="0.4"
+        d={`M ${center} ${center * 0.38} L ${center + 12} ${center * 0.52} L ${center + 3} ${center * 0.52} L ${center + 3} ${center * 0.97} L ${center - 3} ${center * 0.97} L ${center - 3} ${center * 0.52} L ${center - 12} ${center * 0.52} Z`}
+        fill="none" stroke="#FFF" strokeWidth="1" opacity="0.3"
       />
 
       {/* Vector 3D Kaaba Drawing */}
